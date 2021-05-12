@@ -1,0 +1,39 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+
+ENTITY IR_DECODER IS
+    PORT (
+        CLK, RESET : IN STD_LOGIC;
+        IR : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+        R_SRC_NUM, R_DEST_NUM : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+        OPCODE : OUT STD_LOGIC_VECTOR (4 DOWNTO 0);
+        IMMEDIATE : OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
+    );
+END IR_DECODER;
+
+ARCHITECTURE ARCH_IR_DECODER OF IR_DECODER IS
+
+BEGIN
+
+    PROCESS (CLK, RESET)
+    BEGIN
+
+        IF RESET = '1' THEN
+
+            R_SRC_NUM <= (OTHERS => '0');
+            R_DEST_NUM <= (OTHERS => '0');
+            OPCODE <= (OTHERS => '0');
+            IMMEDIATE <= (OTHERS => '0');
+
+        ELSIF RISING_EDGE(CLK) THEN
+
+            R_SRC_NUM <= IR(18 DOWNTO 16);
+            R_DEST_NUM <= IR(21 DOWNTO 19);
+            OPCODE <= IR(27 DOWNTO 23);
+            IMMEDIATE <= IR(15 DOWNTO 0);
+
+        END IF;
+    END PROCESS;
+
+END ARCHITECTURE;
