@@ -1,0 +1,13 @@
+// memory data file (do not edit the following line - required for mem load use)
+// instance=/ram/RamArray
+// format=mti addressradix=d dataradix=b version=1.0 wordsperline=1 noaddress
+0000010111000110
+0000000001100100
+0000010111000010
+0000000000001011
+0000001010000110
+0001001010000010
+1100001001000100
+1100001001000100
+0100000100000100
+1111111111111110
