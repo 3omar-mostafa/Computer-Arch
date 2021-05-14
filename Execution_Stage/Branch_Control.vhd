@@ -45,9 +45,9 @@ BEGIN
             BRANCH_TAKEN_SIG <= (COMPARATOR_OUT AND BRANCH) OR JMP;
 
             IF HAS_NEXT_OPERAND = '1' THEN
-                ADDER_OUT <= PC_IN + 2;
-            ELSE
                 ADDER_OUT <= PC_IN + 4;
+            ELSE
+                ADDER_OUT <= PC_IN + 2;
             END IF;
 
             IF BRANCH_TAKEN_SIG = '1' THEN
