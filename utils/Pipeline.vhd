@@ -64,13 +64,14 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 	END COMPONENT;
 
 	--PCIN should be from the Branch Control Unit
-	Signal PCIN,PCOUT,RsrcEXOUT,AluEXOUT,RsrcMEMIN,AluMEMIN,MEMDataOut : STD_LOGIC_VECTOR(31 DOWNTO 0); 
+	Signal PCIN,PCOUT,RsrcEXOUT,AluEXOUT,RsrcMEMIN,AluMEMIN,MEMDataOut,DataWBIN,AluWBIN,DataWBOut : STD_LOGIC_VECTOR(31 DOWNTO 0); 
 	--MREXOUT -> memory read the output from execution stage
 	--MRMEMIN -> memory read the input to memory stage
-	Signal PCEnable,MREXOUT,MWEXOUT,WBEXOUT,MRMEMIN,MWMEMIN,WBMEMIN,MemAddSelector,MR : STD_LOGIC; 
+	Signal PCEnable,MREXOUT,MWEXOUT,WBEXOUT,MRMEMIN,MWMEMIN,WBMEMIN,MemAddSelector,MR,MRWBIN,WBWBIN : STD_LOGIC; 
 	--RdestAddEXOUT -> dest register address output from execution stage
-	Signal RdestAddEXOUT,RdestAddMEMIN : STD_LOGIC_VECTOR (2 DOWNTO 0);
+	Signal RdestAddEXOUT,RdestAddMEMIN, RdestAddWBIN : STD_LOGIC_VECTOR (2 DOWNTO 0);
 	Signal RamAddress : STD_LOGIC_VECTOR(19 DOWNTO 0);
+
 
 	BEGIN
 
@@ -80,10 +81,17 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 	RamAddress <= 
 		PCOUT(19 DOWNTO 0) WHEN MemAddSelector = '0'
 		ELSE AluMEMIN(19 DOWNTO 0) WHEN MemAddSelector = '1';
+
+	DataWBOut <= 
+		DataWBIN WHEN MRWBIN = '1'
+		ELSE AluWBIN WHEN MRWBIN = '0';
 	
 	R : Ram PORT MAP(Clk,MWMEMIN,MR,RamAddress,RsrcMEMIN,MEMDataOut);
 	PC : POS_N_REGISTER GENERIC MAP(32) PORT MAP(PCEnable, Clk, Rst, PCIN, PCOUT);
 	EXMEM : EX_MEM_buffer PORT MAP(Clk,Rst,MREXOUT,MWEXOUT,WBEXOUT,RdestAddEXOUT,RsrcEXOUT,AluEXOUT,MRMEMIN,MWMEMIN,WBMEMIN,RdestAddMEMIN,RsrcMEMIN,AluMEMIN);
+
+	MEMWB : MEM_WB_buffer PORT MAP(Clk,Rst,MRMEMIN,WBMEMIN,RdestAddMEMIN,MEMDataOut,AluMEMIN,MRWBIN,WBWBIN,RdestAddWBIN,DataWBIN,AluWBIN);
+
 	
 		
 END arch_Pipeline;
