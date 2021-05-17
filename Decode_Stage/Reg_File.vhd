@@ -19,10 +19,10 @@ ARCHITECTURE ARCH_REG_FILE OF REG_FILE IS
     COMPONENT NEG_N_REGISTER IS
         GENERIC (N : INTEGER := 32);
         PORT (
-            Enable : IN STD_LOGIC;
-            clk, rst : IN STD_LOGIC;
-            D : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
-            Q : OUT STD_LOGIC_VECTOR(N - 1 DOWNTO 0)
+            Enable    : IN STD_LOGIC;
+            clk, rst  : IN STD_LOGIC;
+            D         : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
+            Q         : OUT STD_LOGIC_VECTOR(N - 1 DOWNTO 0)
         );
     END COMPONENT;
 
