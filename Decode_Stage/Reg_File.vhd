@@ -22,7 +22,8 @@ ARCHITECTURE ARCH_REG_FILE OF REG_FILE IS
             Enable    : IN STD_LOGIC;
             clk, rst  : IN STD_LOGIC;
             D         : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
-            Q         : OUT STD_LOGIC_VECTOR(N - 1 DOWNTO 0)
+            Q         : OUT STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
+            rst_value : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0) := (OTHERS => '0') -- Reset to rst_value if provided, else reset to zeros [This is an optional parameter]
         );
     END COMPONENT;
 
