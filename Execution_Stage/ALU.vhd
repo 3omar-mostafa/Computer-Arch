@@ -61,6 +61,7 @@ ARCHITECTURE arch_ALU OF ALU IS
 	SIGNAL SP_in                               : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL SP_add                              : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL SP_sub                              : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL SP_reset                            : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"000FFFFE";  -- Stack Pointer initialized by pointing to the highest memory address (2^20 -2) for 1MB memory
 	SIGNAL SP_Enable                           : STD_LOGIC;
 
 	SIGNAL OutPort_Enable                      : STD_LOGIC;
@@ -77,7 +78,7 @@ BEGIN
 	SP_in  <= SP_add WHEN push = '0' ELSE SP_sub;
 
 	SP_Enable <= push OR pop;
-	SP : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(SP_Enable, clk, rst, SP_in, SP_out);
+	SP : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(SP_Enable, clk, rst, SP_in, SP_out, SP_reset);
 
 	OutPort_Enable <= '1' WHEN opcode = "01000" ELSE '0';
 	OutPortReg : POS_N_REGISTER GENERIC MAP(32) PORT MAP(OutPort_Enable, clk, rst, Rdst, OutPort); -- Out instruction
