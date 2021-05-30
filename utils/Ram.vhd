@@ -22,13 +22,13 @@ ARCHITECTURE RamArch OF Ram IS
 	BEGIN
 		PROCESS(Clk) IS
 		BEGIN
-			IF rising_edge(Clk) AND (MR = '1' OR MW = '1') THEN
+			IF falling_edge(Clk) AND (MR = '1' OR MW = '1') THEN
 			    IF MW = '1' THEN
-		       		 RamArray(to_integer(unsigned(Address))) <= RamDataIn(((DataWidth/2)-1) DOWNTO 0);
-			         RamArray(to_integer(unsigned(Address)+1)) <= RamDataIn(DataWidth-1 DOWNTO (DataWidth/2));
+		       		 RamArray(to_integer(unsigned(Address)+1)) <= RamDataIn(((DataWidth/2)-1) DOWNTO 0);
+			         RamArray(to_integer(unsigned(Address))) <= RamDataIn(DataWidth-1 DOWNTO (DataWidth/2));
 			    ELSIF MR = '1' THEN 
-				 RamDataOut(((DataWidth/2)-1) DOWNTO 0) <= RamArray(to_integer(unsigned(Address)));
-				 RamDataOut(DataWidth-1 DOWNTO (DataWidth/2)) <= RamArray(to_integer(unsigned(Address)+1));
+				 RamDataOut(((DataWidth/2)-1) DOWNTO 0) <= RamArray(to_integer(unsigned(Address)+1));
+				 RamDataOut(DataWidth-1 DOWNTO (DataWidth/2)) <= RamArray(to_integer(unsigned(Address)));
 			    END IF;
 			END IF;
 		END PROCESS;
