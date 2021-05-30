@@ -30,7 +30,7 @@ BEGIN
 
             R_SRC_NUM <= IR(18 DOWNTO 16);
             R_DEST_NUM <= IR(21 DOWNTO 19);
-            OPCODE <= IR(27 DOWNTO 23);
+            OPCODE <= IR(26 DOWNTO 22);
             IMMEDIATE <= IR(15 DOWNTO 0);
 
         END IF;
