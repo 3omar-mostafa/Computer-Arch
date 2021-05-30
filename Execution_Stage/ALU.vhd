@@ -5,8 +5,8 @@ USE IEEE.std_logic_unsigned.ALL;
 
 ENTITY ALU IS
 	PORT (
-		push, pop  : IN STD_LOGIC;
 		clk, rst   : IN STD_LOGIC;
+		push, pop  : IN STD_LOGIC;
 		opcode     : IN STD_LOGIC_VECTOR(4 DOWNTO 0);
 		Rsrc, Rdst : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		InPort     : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
