@@ -48,14 +48,14 @@ BEGIN
 
     R6 : POS_N_REGISTER GENERIC MAP(9) PORT MAP('1', clk, reset, controlSignalsIn, controlSignalsOut);
 
-    MROut <= controlSignalsOut(0);
-    MWOut <= controlSignalsOut(1);
-    WBOut <= controlSignalsOut(2);
-    isLoadStoreOut <= controlSignalsOut(3);
+    MROut <= controlSignalsOut(8);
+    MWOut <= controlSignalsOut(7);
+    WBOut <= controlSignalsOut(6);
+    isLoadStoreOut <= controlSignalsOut(5);
     popOut <= controlSignalsOut(4);
-    pushOut <= controlSignalsOut(5);
-    branchOut <= controlSignalsOut(6);
-    jumpOut <= controlSignalsOut(7);
-    hasNextOpOut <= controlSignalsOut(8);
+    pushOut <= controlSignalsOut(3);
+    branchOut <= controlSignalsOut(2);
+    jumpOut <= controlSignalsOut(1);
+    hasNextOpOut <= controlSignalsOut(0);
 
 END ARCHITECTURE;
