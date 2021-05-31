@@ -27,14 +27,16 @@ END Execution_Stage;
 ARCHITECTURE arch_Execution_Stage OF Execution_Stage IS
     COMPONENT ALU IS
         PORT (
-            clk, rst   : IN STD_LOGIC;
-            push, pop  : IN STD_LOGIC;
-            opcode     : IN STD_LOGIC_VECTOR(4 DOWNTO 0);
-            Rsrc, Rdst : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            InPort     : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            Rout       : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-            OutPort    : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-            Flags      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0) -- Flags bits order : Carry, Negative, Zero
+            clk, rst      : IN STD_LOGIC;
+            push, pop     : IN STD_LOGIC;
+            opcode        : IN STD_LOGIC_VECTOR(4 DOWNTO 0);
+            Rsrc, Rdst    : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            InPort        : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            Rout          : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            OutPort       : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            carry_flag    : OUT STD_LOGIC;
+            negative_flag : OUT STD_LOGIC;
+            zero_flag     : OUT STD_LOGIC
         );
     END COMPONENT;
 
@@ -52,18 +54,18 @@ ARCHITECTURE arch_Execution_Stage OF Execution_Stage IS
             CLK, RESET, HAS_NEXT_OPERAND, BRANCH, JMP : IN STD_LOGIC;
             PC_IN, R_DEST_ADDRESS                     : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
             OPCODE                                    : IN STD_LOGIC_VECTOR (4 DOWNTO 0);
-            FLAGS                                     : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+            carry_flag                                : IN STD_LOGIC;
+            negative_flag                             : IN STD_LOGIC;
+            zero_flag                                 : IN STD_LOGIC;
             IS_BRANCH_TAKEN                           : OUT STD_LOGIC;
             PC_OUT                                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
         );
     END COMPONENT;
-
-
-    SIGNAL Flags                        : STD_LOGIC_VECTOR(2 DOWNTO 0);
-    SIGNAL Sel_Rsrc, Sel_Rdst           : STD_LOGIC_VECTOR(1 DOWNTO 0);
-    SIGNAL aluRsrc, aluRdst             : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    SIGNAL forwardedRsrc, forwardedRdst : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    SIGNAL extendedImmediateValue       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL carry_flag, negative_flag, zero_flag : STD_LOGIC;
+    SIGNAL Sel_Rsrc, Sel_Rdst                   : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    SIGNAL aluRsrc, aluRdst                     : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL forwardedRsrc, forwardedRdst         : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL extendedImmediateValue               : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
 
@@ -85,8 +87,8 @@ BEGIN
     aluRdst <= forwardedRsrc WHEN (isLoadStore = '1' OR hasNextOperand = '1') ELSE
                forwardedRdst;
 
-    alu_unit    : ALU PORT MAP(clk, rst, push, pop, OpCode, aluRsrc, aluRdst, InPort, AluOut, OutPort, Flags);
+    alu_unit    : ALU PORT MAP(clk, rst, push, pop, OpCode, aluRsrc, aluRdst, InPort, AluOut, OutPort, carry_flag, negative_flag, zero_flag);
     forward     : Forwarding_Unit PORT MAP(ID_EX_Rsrc, ID_EX_Rdst, EX_Mem_Rdst, Mem_WB_Rdst, EX_Mem_WriteBack, Mem_WB_WriteBack, Sel_Rsrc, Sel_Rdst);
-    branch_unit : BRANCH_CONTROL PORT MAP(clk, rst, hasNextOperand, branch, jump, PCin, forwardedRdst, OpCode, Flags, isBranchTaken, PCout);
+    branch_unit : BRANCH_CONTROL PORT MAP(clk, rst, hasNextOperand, branch, jump, PCin, forwardedRdst, OpCode, carry_flag, negative_flag, zero_flag, isBranchTaken, PCout);
 
 END ARCHITECTURE;

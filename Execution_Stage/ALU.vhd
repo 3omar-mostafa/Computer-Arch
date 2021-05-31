@@ -5,14 +5,16 @@ USE IEEE.std_logic_unsigned.ALL;
 
 ENTITY ALU IS
 	PORT (
-		clk, rst   : IN STD_LOGIC;
-		push, pop  : IN STD_LOGIC;
-		opcode     : IN STD_LOGIC_VECTOR(4 DOWNTO 0);
-		Rsrc, Rdst : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		InPort     : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Rout       : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		OutPort    : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Flags      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0) -- Flags bits order : Carry, Negative, Zero
+		clk, rst      : IN STD_LOGIC;
+		push, pop     : IN STD_LOGIC;
+		opcode        : IN STD_LOGIC_VECTOR(4 DOWNTO 0);
+		Rsrc, Rdst    : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		InPort        : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Rout          : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		OutPort       : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		carry_flag    : OUT STD_LOGIC;
+		negative_flag : OUT STD_LOGIC;
+		zero_flag     : OUT STD_LOGIC
 	);
 END ALU;
 
@@ -29,7 +31,7 @@ ARCHITECTURE arch_ALU OF ALU IS
 		);
 	END COMPONENT;
 
-	
+
 	COMPONENT NEG_N_REGISTER IS
 		GENERIC (N : INTEGER := 32);
 		PORT (
@@ -51,26 +53,22 @@ ARCHITECTURE arch_ALU OF ALU IS
 		);
 	END COMPONENT;
 
-	SIGNAL carry_flag, carry_flag_enable       : STD_LOGIC;
-	SIGNAL negative_flag, negative_flag_enable : STD_LOGIC;
-	SIGNAL zero_flag, zero_flag_enable         : STD_LOGIC;
+	SIGNAL carry_flag_enable    : STD_LOGIC;
+	SIGNAL negative_flag_enable : STD_LOGIC;
+	SIGNAL zero_flag_enable     : STD_LOGIC;
 
-	SIGNAL temp_result                         : STD_LOGIC_VECTOR(32 DOWNTO 0); -- 32 not 31 to be able to get the carry
+	SIGNAL temp_result          : STD_LOGIC_VECTOR(32 DOWNTO 0); -- 32 not 31 to be able to get the carry
 
-	SIGNAL SP_out                              : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL SP_in                               : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL SP_add                              : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL SP_sub                              : STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL SP_reset                            : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"000FFFFE";  -- Stack Pointer initialized by pointing to the highest memory address (2^20 -2) for 1MB memory
-	SIGNAL SP_Enable                           : STD_LOGIC;
+	SIGNAL SP_out               : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL SP_in                : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL SP_add               : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL SP_sub               : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL SP_reset             : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"000FFFFE";  -- Stack Pointer initialized by pointing to the highest memory address (2^20 -2) for 1MB memory
+	SIGNAL SP_Enable            : STD_LOGIC;
 
-	SIGNAL OutPort_Enable                      : STD_LOGIC;
+	SIGNAL OutPort_Enable : STD_LOGIC;
 
 BEGIN
-
-	carry_reg    : POS_D_FLIP_FLOP PORT MAP(carry_flag_enable, clk, rst, carry_flag, Flags(2));
-	negative_reg : POS_D_FLIP_FLOP PORT MAP(negative_flag_enable, clk, rst, negative_flag, Flags(1));
-	zero_reg     : POS_D_FLIP_FLOP PORT MAP(zero_flag_enable, clk, rst, zero_flag, Flags(0));
 
 	SP_add <= SP_out + 4;
 	SP_sub <= SP_out - 4;
@@ -119,12 +117,16 @@ BEGIN
 	zero_flag_enable <= '1' WHEN opcode = "00011" OR opcode = "00100" OR opcode = "00101" OR opcode = "00110" OR opcode = "00111" OR opcode = "10000" OR opcode = "10001" OR opcode = "10010" OR opcode = "10011"
 	ELSE '0';
 
-	carry_flag    <= temp_result(32) WHEN (carry_flag_enable = '1');
+	carry_flag <= '0' WHEN rst = '1' ELSE
+		 temp_result(32) WHEN (carry_flag_enable = '1');
 
-	negative_flag <= temp_result(31) WHEN (negative_flag_enable = '1');
+	negative_flag <= '0' WHEN rst = '1' ELSE
+		    temp_result(31) WHEN (negative_flag_enable = '1');
 
-	zero_flag     <= '1' WHEN ((unsigned(temp_result(31 DOWNTO 0)) = 0) AND (zero_flag_enable = '1')) ELSE '0';
+	zero_flag <= '0' WHEN rst = '1' ELSE
+					'1' WHEN ((unsigned(temp_result(31 DOWNTO 0)) = 0) AND (zero_flag_enable = '1')) ELSE
+					'0' WHEN zero_flag_enable = '1';
 
-    Rout <= temp_result(31 DOWNTO 0);
-    
+	Rout <= temp_result(31 DOWNTO 0);
+
 END arch_ALU;
