@@ -10,6 +10,13 @@ ENTITY CONTROL_UNIT IS
 	);
 END CONTROL_UNIT;
 
+-- IR Format From 31 DOWNTO 16
+-- Control_Signals | OPCode | Rsrc | Rdst | 0 |
+--       0000      | 00000  | 000  | 000  | 0 |
+--       |  |      | |   |  | | |  | | |  | | |
+--       V  V      | V   V  | V V  | V V  | V |
+--      31  28     | 27  23 |22 20 |19 17 |16 |
+
 ARCHITECTURE ARCH_CONTROL_UNIT OF CONTROL_UNIT IS
 
 BEGIN

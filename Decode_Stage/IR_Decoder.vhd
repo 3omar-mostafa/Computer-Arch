@@ -12,6 +12,13 @@ ENTITY IR_DECODER IS
     );
 END IR_DECODER;
 
+-- IR Format From 31 DOWNTO 16
+-- Control_Signals | OPCode | Rsrc | Rdst | 0 |
+--       0000      | 00000  | 000  | 000  | 0 |
+--       |  |      | |   |  | | |  | | |  | | |
+--       V  V      | V   V  | V V  | V V  | V |
+--      31  28     | 27  23 |22 20 |19 17 |16 |
+
 ARCHITECTURE ARCH_IR_DECODER OF IR_DECODER IS
 
 BEGIN
