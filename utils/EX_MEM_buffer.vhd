@@ -37,8 +37,8 @@ BEGIN
 	R2 : POS_N_REGISTER GENERIC MAP(3) PORT MAP('1', clock, reset, RdestAddress, RdestAddressOut);
 	R3 : POS_N_REGISTER GENERIC MAP(3) PORT MAP('1', clock, reset, controlSignalsIn, controlSignalsOut);
 
-	MROut <= controlSignalsOut(0);
+	MROut <= controlSignalsOut(2);
 	MWOut <= controlSignalsOut(1);
-	WBOut <= controlSignalsOut(2);
+	WBOut <= controlSignalsOut(0);
 
 END ARCHITECTURE;
