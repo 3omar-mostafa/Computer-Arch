@@ -4,14 +4,14 @@ USE ieee.numeric_std.ALL;
 
 ENTITY REG_FILE IS
     PORT (
-        CLK, RESET : IN STD_LOGIC;
-        DATA_IN : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-        R_DEST_EN : IN STD_LOGIC;
+        CLK, RESET    : IN STD_LOGIC;
+        DATA_IN       : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+        R_DEST_EN     : IN STD_LOGIC;
         R_DEST_NUM_WB : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        R_SRC_NUM : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        R_DEST_NUM : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        R_SRC_OUT : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-        R_DEST_OUT : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+        R_SRC_NUM     : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        R_DEST_NUM    : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        R_SRC_OUT     : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+        R_DEST_OUT    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
     );
 END REG_FILE;
 
@@ -32,7 +32,7 @@ ARCHITECTURE ARCH_REG_FILE OF REG_FILE IS
         GENERIC (N : INTEGER := 3); -- 3x8 DECODER
         PORT (
             Enable : IN STD_LOGIC;
-            InpuT : IN STD_LOGIC_VECTOR (N - 1 DOWNTO 0);
+            InpuT  : IN STD_LOGIC_VECTOR (N - 1 DOWNTO 0);
             Output : OUT STD_LOGIC_VECTOR ((2 ** N) - 1 DOWNTO 0)
         );
     END COMPONENT;
@@ -61,55 +61,24 @@ BEGIN
     R1 : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(R_DEST_ENABLES(1), CLK, RESET, DATA_IN, R1_OUT);
     R0 : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(R_DEST_ENABLES(0), CLK, RESET, DATA_IN, R0_OUT);
 
-    PROCESS (CLK)
-    BEGIN
+    R_SRC_OUT <= R0_OUT WHEN R_SRC_NUM = "000" ELSE
+                 R1_OUT WHEN R_SRC_NUM = "001" ELSE
+                 R2_OUT WHEN R_SRC_NUM = "010" ELSE
+                 R3_OUT WHEN R_SRC_NUM = "011" ELSE
+                 R4_OUT WHEN R_SRC_NUM = "100" ELSE
+                 R5_OUT WHEN R_SRC_NUM = "101" ELSE
+                 R6_OUT WHEN R_SRC_NUM = "110" ELSE
+                 R7_OUT WHEN R_SRC_NUM = "111" ELSE
+                 (OTHERS => '0');
 
-        IF RISING_EDGE(CLK) THEN
-
-            CASE R_SRC_NUM IS
-                WHEN "000" =>
-                    R_SRC_OUT <= R0_OUT;
-                WHEN "001" =>
-                    R_SRC_OUT <= R1_OUT;
-                WHEN "010" =>
-                    R_SRC_OUT <= R2_OUT;
-                WHEN "011" =>
-                    R_SRC_OUT <= R3_OUT;
-                WHEN "100" =>
-                    R_SRC_OUT <= R4_OUT;
-                WHEN "101" =>
-                    R_SRC_OUT <= R5_OUT;
-                WHEN "110" =>
-                    R_SRC_OUT <= R6_OUT;
-                WHEN "111" =>
-                    R_SRC_OUT <= R7_OUT;
-                WHEN OTHERS =>
-                    R_SRC_OUT <= (OTHERS => '0');
-            END CASE;
-
-            CASE R_DEST_NUM IS
-                WHEN "000" =>
-                    R_DEST_OUT <= R0_OUT;
-                WHEN "001" =>
-                    R_DEST_OUT <= R1_OUT;
-                WHEN "010" =>
-                    R_DEST_OUT <= R2_OUT;
-                WHEN "011" =>
-                    R_DEST_OUT <= R3_OUT;
-                WHEN "100" =>
-                    R_DEST_OUT <= R4_OUT;
-                WHEN "101" =>
-                    R_DEST_OUT <= R5_OUT;
-                WHEN "110" =>
-                    R_DEST_OUT <= R6_OUT;
-                WHEN "111" =>
-                    R_DEST_OUT <= R7_OUT;
-                WHEN OTHERS =>
-                    R_DEST_OUT <= (OTHERS => '0');
-            END CASE;
-
-        END IF;
-
-    END PROCESS;
+    R_DEST_OUT <= R0_OUT WHEN R_DEST_NUM = "000" ELSE
+                  R1_OUT WHEN R_DEST_NUM = "001" ELSE
+                  R2_OUT WHEN R_DEST_NUM = "010" ELSE
+                  R3_OUT WHEN R_DEST_NUM = "011" ELSE
+                  R4_OUT WHEN R_DEST_NUM = "100" ELSE
+                  R5_OUT WHEN R_DEST_NUM = "101" ELSE
+                  R6_OUT WHEN R_DEST_NUM = "110" ELSE
+                  R7_OUT WHEN R_DEST_NUM = "111" ELSE
+                  (OTHERS => '0');
 
 END ARCHITECTURE;
