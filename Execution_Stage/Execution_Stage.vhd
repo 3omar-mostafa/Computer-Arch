@@ -84,7 +84,7 @@ BEGIN
     aluRsrc <= forwardedRsrc WHEN hasNextOperand = '0' ELSE
                extendedImmediateValue;
 
-    aluRdst <= forwardedRsrc WHEN (isLoadStore = '1' OR hasNextOperand = '1') ELSE
+    aluRdst <= forwardedRsrc WHEN (isLoadStore = '1' AND hasNextOperand = '1') ELSE
                forwardedRdst;
 
     alu_unit    : ALU PORT MAP(clk, rst, push, pop, OpCode, aluRsrc, aluRdst, InPort, AluOut, OutPort, carry_flag, negative_flag, zero_flag);
