@@ -34,7 +34,7 @@ ARCHITECTURE arch_Execution_Stage OF Execution_Stage IS
             InPort        : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             Rout          : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
             OutPort       : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-            carry_flag    : OUT STD_LOGIC;
+            carry_flag    : INOUT STD_LOGIC;
             negative_flag : OUT STD_LOGIC;
             zero_flag     : OUT STD_LOGIC
         );
