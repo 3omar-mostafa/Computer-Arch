@@ -210,7 +210,7 @@ BEGIN
 	EXECUTING_STG : Execution_Stage PORT MAP(
 		Clk, Rst, EX_IN_isLoadStore, EX_IN_hasNextOp,
 		EX_IN_push, EX_IN_pop, EX_IN_branch, EX_IN_jump, EX_IN_RsrcAddress, EX_IN_RdestAddress,
-		EX_IN_RdestAddress, RdestAddMEMIN, WBMEMIN, WBWBIN, EX_IN_RsrcData,
+		RdestAddMEMIN, RdestAddWBIN, WBMEMIN, WBWBIN, EX_IN_RsrcData,
 		EX_IN_RdestData, AluMEMIN, DataWBOut, EX_IN_ImmediateVal,
 		EX_IN_OpCode, PCOUT, IN_PORT,
 		PCIN, OUT_PORT, RsrcEXOUT, AluEXOUT, isBranchTaken
