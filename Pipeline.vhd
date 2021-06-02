@@ -37,7 +37,7 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 			DataWidth    : INTEGER := 32
 		);
 		PORT (
-			Clk        : IN STD_LOGIC;
+			Clk, Rst   : IN STD_LOGIC;
 			MW, MR     : IN STD_LOGIC;
 			Address    : IN STD_LOGIC_VECTOR(RamAddrWidth - 1 DOWNTO 0);
 			RamDataIn  : IN STD_LOGIC_VECTOR(DataWidth - 1 DOWNTO 0);
@@ -178,17 +178,17 @@ BEGIN
 						AluMEMIN(19 DOWNTO 0) WHEN MemAddSelector = '1';
 
 	DataWBOut <= DataWBIN WHEN MRWBIN = '1' ELSE
-				AluWBIN  WHEN MRWBIN = '0';
+				 AluWBIN  WHEN MRWBIN = '0';
 
 	R : Ram PORT MAP(
-		Clk,         --  Clk        
+		Clk, Rst,    --  Clk        
 		MWMEMIN, MR, --  MW, MR    
 		RamAddress,  --  Address   
 		RsrcMEMIN,   --  RamDataIn 
 		-----------OUTPUT-----------
 		MEMDataOut); --  RamDataOut
 
-	PC   : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(PCEnable, Clk, Rst, PCIN, PCOUT);
+	PC   : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(PCEnable, Clk, Rst, PCIN, PCOUT, MEMDataOut);
 
 	IFID : IF_ID_buffer PORT MAP(
 		Clk,              -- clock 
