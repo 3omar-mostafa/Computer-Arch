@@ -58,8 +58,8 @@ ARCHITECTURE arch_ALU OF ALU IS
 
 BEGIN
 
-	SP_add <= SP_out + 4;
-	SP_sub <= SP_out - 4;
+	SP_add <= SP_out + 2;
+	SP_sub <= SP_out - 2;
 
 	SP_in  <= SP_add WHEN push = '0' ELSE SP_sub;
 
