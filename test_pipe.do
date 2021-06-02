@@ -9,15 +9,8 @@ sim:/pipeline/PCEnable \
 sim:/pipeline/AluEXOUT \
 sim:/pipeline/AluMEMIN \
 sim:/pipeline/AluWBIN
-add log  \
-sim:/pipeline/MEMDataOut \
-sim:/pipeline/IR \
-sim:/pipeline/RamAddress
 mem load -i {./Test_Cases/OneOperand.mem} -format mti /pipeline/R/RamArray
-radix -decimal
-add log sim:/pipeline/EXECUTING_STG/alu_unit/*
-add log sim:/pipeline/EXECUTING_STG/branch_unit/*
-add log sim:/pipeline/*
+radix -hexadecimal
 add wave -position insertpoint  \
 sim:/pipeline/IR
 add wave -position insertpoint  \
@@ -33,6 +26,8 @@ sim:/pipeline/DECODING_STG/REG_F/R0_OUT \
 sim:/pipeline/DECODING_STG/REG_F/R1_OUT \
 sim:/pipeline/DECODING_STG/REG_F/R2_OUT
 
+add log -r sim:/pipeline/*
+
 force -freeze sim:/pipeline/Clk 1 0, 0 {50 ps} -r 100
 force -freeze sim:/pipeline/Rst 1 0
 run
@@ -47,7 +42,7 @@ run
 run
 force -freeze sim:/pipeline/IN_PORT 5 0
 run
-force -freeze sim:/pipeline/IN_PORT 16 0
+force -freeze sim:/pipeline/IN_PORT 10 0
 run
 run
 run
