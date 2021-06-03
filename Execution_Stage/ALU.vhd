@@ -90,7 +90,7 @@ BEGIN
 
         --  2 operands
         ('0' & Rdst + Rsrc)     WHEN opcode = "10000" ELSE
-        ('0' & Rdst - Rsrc)     WHEN opcode = "10001" ELSE
+        ('0' & Rsrc - Rdst)     WHEN opcode = "10001" ELSE
         ('0' & (Rdst AND Rsrc)) WHEN opcode = "10010" ELSE
         ('0' & (Rdst OR Rsrc))  WHEN opcode = "10011" ELSE
         ('0' & Rsrc)            WHEN opcode = "10100" ELSE -- MOV operation

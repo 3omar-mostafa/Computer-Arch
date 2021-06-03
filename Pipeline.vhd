@@ -134,7 +134,7 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 	END COMPONENT;
 
 	--PCIN should be from the Branch Control Unit
-	SIGNAL PCIN                                                                        : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL PCIN                                                                        : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL PCOUT, RsrcEXOUT, AluEXOUT, RsrcMEMIN                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL AluMEMIN, MEMDataOut, DataWBIN, AluWBIN, DataWBOut, IR                      : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	--MREXOUT -> memory read the output from execution stage
