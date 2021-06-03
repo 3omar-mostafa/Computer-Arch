@@ -76,10 +76,10 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 		PORT (
 			clock, reset, MR, MW, WB : IN STD_LOGIC;
 			RdestAddress             : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-			Rsrc, AluIn              : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			Rdst, AluIn              : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 			MROut, MWOut, WBOut      : OUT STD_LOGIC;
 			RdestAddressOut          : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-			RsrcOut, AluOut          : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+			RdstOut, AluOut          : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
 		);
 	END COMPONENT;
 
@@ -128,14 +128,14 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 
 			PCout                              : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			OutPort                            : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			RsrcOut, AluOut                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+			RdstOut, AluOut                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 			isBranchTaken                      : OUT STD_LOGIC
 		);
 	END COMPONENT;
 
 	--PCIN should be from the Branch Control Unit
 	SIGNAL PCIN                                                                        : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL PCOUT, RsrcEXOUT, AluEXOUT, RsrcMEMIN                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL PCOUT, RdstEXOUT, AluEXOUT, RdstMEMIN                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL AluMEMIN, MEMDataOut, DataWBIN, AluWBIN, DataWBOut, IR                      : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	--MREXOUT -> memory read the output from execution stage
 	--MRMEMIN -> memory read the input to memory stage
@@ -248,7 +248,7 @@ BEGIN
 		------------------------OUTPUT------------------------
 		PCIN,                                            -- PCout                              
 		OUT_PORT,                                        -- OutPort                            
-		RsrcEXOUT, AluEXOUT,                             -- RsrcOut, AluOut                    
+		RdstEXOUT, AluEXOUT,                             -- RdstOut, AluOut                    
 		isBranchTaken                                    -- isBranchTaken                      
 	);
 
@@ -256,11 +256,11 @@ BEGIN
 		Clk, Rst,                     -- clock, reset  
 		EX_IN_MR, EX_IN_MW, EX_IN_WB, -- MR, MW, WB 
 		EX_IN_RdestAddress,           -- RdestAddress             
-		RsrcEXOUT, AluEXOUT,          -- Rsrc, AluIn              
+		RdstEXOUT, AluEXOUT,          -- Rdst, AluIn              
 		------------------------OUTPUT------------------------
 		MRMEMIN, MWMEMIN, WBMEMIN,    -- MROut, MWOut, WBOut      
 		RdestAddMEMIN,                -- RdestAddressOut          
-		RsrcMEMIN, AluMEMIN);         -- RsrcOut, AluOut          
+		RdstMEMIN, AluMEMIN);         -- RdstOut, AluOut          
 
 	MEMWB : MEM_WB_buffer PORT MAP(
 		Clk, Rst,             -- clock, reset                  

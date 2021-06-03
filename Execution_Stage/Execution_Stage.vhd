@@ -19,7 +19,7 @@ ENTITY Execution_Stage IS
 
         PCout                              : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         OutPort                            : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-        RsrcOut, AluOut                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+        RdstOut, AluOut                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
         isBranchTaken                      : OUT STD_LOGIC
     );
 END Execution_Stage;
@@ -69,7 +69,7 @@ ARCHITECTURE arch_Execution_Stage OF Execution_Stage IS
 
 BEGIN
 
-    RsrcOut                              <= forwardedRsrc;
+    RdstOut                              <= forwardedRdst;
     extendedImmediateValue(31 DOWNTO 16) <= (OTHERS => ImmediateValue(15));
     extendedImmediateValue(15 DOWNTO 0)  <= ImmediateValue;
 
