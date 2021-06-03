@@ -9,7 +9,7 @@ sim:/pipeline/PCEnable \
 sim:/pipeline/AluEXOUT \
 sim:/pipeline/AluMEMIN \
 sim:/pipeline/AluWBIN
-mem load -i {./Test_Cases/TwoOperand.mem} -format mti /pipeline/R/RamArray
+mem load -i {./Test_Cases/TwoOperand.mem} -format mti /pipeline/InstructionRam/RamArray
 radix -hexadecimal
 add wave -position insertpoint  \
 sim:/pipeline/IR
