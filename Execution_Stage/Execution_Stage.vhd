@@ -19,7 +19,7 @@ ENTITY Execution_Stage IS
 
         PCout                              : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         OutPort                            : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-        RsrcOut, AluOut                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+        RdstOut, AluOut                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
         isBranchTaken                      : OUT STD_LOGIC
     );
 END Execution_Stage;
@@ -69,7 +69,7 @@ ARCHITECTURE arch_Execution_Stage OF Execution_Stage IS
 
 BEGIN
 
-    RsrcOut                              <= forwardedRsrc;
+    RdstOut                              <= forwardedRdst;
     extendedImmediateValue(31 DOWNTO 16) <= (OTHERS => ImmediateValue(15));
     extendedImmediateValue(15 DOWNTO 0)  <= ImmediateValue;
 
@@ -84,7 +84,7 @@ BEGIN
     aluRsrc <= forwardedRsrc WHEN hasNextOperand = '0' ELSE
                extendedImmediateValue;
 
-    aluRdst <= forwardedRsrc WHEN (isLoadStore = '1' OR hasNextOperand = '1') ELSE
+    aluRdst <= forwardedRsrc WHEN isLoadStore = '1' ELSE
                forwardedRdst;
 
     alu_unit    : ALU PORT MAP(clk, rst, push, pop, OpCode, aluRsrc, aluRdst, InPort, AluOut, OutPort, carry_flag, negative_flag, zero_flag);
