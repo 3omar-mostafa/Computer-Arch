@@ -15,7 +15,7 @@ ENTITY Ram IS
 		RamDataOut : OUT std_logic_vector(DataWidth-1 DOWNTO 0));
 END ENTITY;
 ARCHITECTURE RamArch OF Ram IS
-	TYPE RamType IS ARRAY(0 TO (2**(RamAddrWidth))-1) of std_logic_vector(((DataWidth/2)-1) DOWNTO 0);
+	TYPE RamType IS ARRAY(0 TO (2**(RamAddrWidth))+1) of std_logic_vector(((DataWidth/2)-1) DOWNTO 0);
 	SIGNAL RamArray : RamType:=(
 		OTHERS =>(OTHERS => '0')
 	);
