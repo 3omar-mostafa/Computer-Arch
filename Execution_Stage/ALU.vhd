@@ -31,6 +31,17 @@ ARCHITECTURE arch_ALU OF ALU IS
 		);
 	END COMPONENT;
 
+	COMPONENT POS_N_REGISTER IS
+		GENERIC (N : INTEGER := 32);
+		PORT (
+			Enable    : IN STD_LOGIC;
+			clk, rst  : IN STD_LOGIC;
+			D         : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
+			Q         : OUT STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
+			rst_value : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0) := (OTHERS => '0') -- Reset to rst_value if provided, else reset to zeros [This is an optional parameter]
+		);
+	END COMPONENT;
+
 
 	COMPONENT POS_D_FLIP_FLOP IS
 		PORT (
@@ -67,7 +78,7 @@ BEGIN
 	SP_in  <= SP_add WHEN push = '0' ELSE SP_sub;
 
 	SP_Enable <= push OR pop;
-	SP : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(SP_Enable, clk, rst, SP_in, SP_out, SP_reset);
+	SP : POS_N_REGISTER GENERIC MAP(32) PORT MAP(SP_Enable, clk, rst, SP_in, SP_out, SP_reset);
 
 	OutPort_Enable <= '1' WHEN opcode = "01000" ELSE '0';
 	OutPortReg : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(OutPort_Enable, clk, rst, Rdst, OutPort); -- Out instruction
