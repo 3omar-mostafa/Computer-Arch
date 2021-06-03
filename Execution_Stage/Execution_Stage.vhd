@@ -70,7 +70,7 @@ ARCHITECTURE arch_Execution_Stage OF Execution_Stage IS
 BEGIN
 
     RdstOut                              <= forwardedRdst;
-    extendedImmediateValue(31 DOWNTO 16) <= (OTHERS => ImmediateValue(15));
+    extendedImmediateValue(31 DOWNTO 16) <= (OTHERS => '0');
     extendedImmediateValue(15 DOWNTO 0)  <= ImmediateValue;
 
     forwardedRsrc <= Mem_Stage_Out WHEN Sel_Rsrc = "01" ELSE
