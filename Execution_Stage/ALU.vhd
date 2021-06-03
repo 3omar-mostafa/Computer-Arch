@@ -66,9 +66,13 @@ ARCHITECTURE arch_ALU OF ALU IS
 	SIGNAL SP_reset             : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"000FFFFE";  -- Stack Pointer initialized by pointing to the highest memory address (2^20 -2) for 1MB memory
 	SIGNAL SP_Enable            : STD_LOGIC;
 
-	SIGNAL OutPort_Enable : STD_LOGIC;
+	SIGNAL OutPort_Enable       : STD_LOGIC;
+
+	SIGNAL isRdstBiggerThanRsrc : STD_LOGIC;
 
 BEGIN
+
+	isRdstBiggerThanRsrc <= '1' when (Rdst >= Rsrc) else '0';
 
 	carry_reg : POS_D_FLIP_FLOP PORT MAP(carry_flag_enable, clk, rst, carry_flag, carry_flag_out);
 
@@ -101,7 +105,8 @@ BEGIN
 
         --  2 operands
         ('0' & Rdst + Rsrc)     WHEN opcode = "10000" ELSE
-        ('0' & Rsrc - Rdst)     WHEN opcode = "10001" ELSE
+		('0' & Rdst - Rsrc)     WHEN (opcode = "10001" AND isRdstBiggerThanRsrc = '1') ELSE
+		('1' & Rsrc - Rdst)     WHEN (opcode = "10001" AND isRdstBiggerThanRsrc = '0') ELSE
         ('0' & (Rdst AND Rsrc)) WHEN opcode = "10010" ELSE
         ('0' & (Rdst OR Rsrc))  WHEN opcode = "10011" ELSE
         ('0' & Rsrc)            WHEN opcode = "10100" ELSE -- MOV operation

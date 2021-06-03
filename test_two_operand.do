@@ -4,15 +4,9 @@ sim:/pipeline/Clk \
 sim:/pipeline/Rst
 add wave  \
 sim:/pipeline/PCOUT \
-sim:/pipeline/PCIN \
-sim:/pipeline/PCEnable \
-sim:/pipeline/AluEXOUT \
-sim:/pipeline/AluMEMIN \
-sim:/pipeline/AluWBIN
+sim:/pipeline/AluEXOUT
 mem load -i {./Test_Cases/TwoOperand.mem} -format mti /pipeline/InstructionRam/RamArray
 radix -hexadecimal
-add wave -position insertpoint  \
-sim:/pipeline/IR
 add wave -position insertpoint  \
 sim:/pipeline/IN_PORT
 add wave -position insertpoint  \
@@ -27,7 +21,9 @@ sim:/pipeline/DECODING_STG/REG_F/R1_OUT \
 sim:/pipeline/DECODING_STG/REG_F/R2_OUT \
 sim:/pipeline/DECODING_STG/REG_F/R3_OUT \
 sim:/pipeline/DECODING_STG/REG_F/R4_OUT \
-sim:/pipeline/DECODING_STG/REG_F/R5_OUT
+sim:/pipeline/DECODING_STG/REG_F/R5_OUT \
+sim:/pipeline/DECODING_STG/REG_F/R6_OUT \
+sim:/pipeline/DECODING_STG/REG_F/R7_OUT
 
 add log -r sim:/pipeline/*
 
