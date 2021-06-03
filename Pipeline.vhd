@@ -159,8 +159,7 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 	SIGNAL EX_IN_RsrcData, EX_IN_RdestData                                             : STD_LOGIC_VECTOR (31 DOWNTO 0);
 	SIGNAL EX_IN_RsrcAddress, EX_IN_RdestAddress                                       : STD_LOGIC_VECTOR (2 DOWNTO 0);
 
-	SIGNAL IN_PORT                                                                     : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL OUT_PORT                                                                    : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL IN_PORT, OUT_PORT, IR_Input                                                 : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 
 	SIGNAL isBranchTaken                                                               : STD_LOGIC;
 
@@ -168,32 +167,37 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 
 BEGIN
 
-	PCEnable         <= NOT(MRMEMIN OR MWMEMIN);
-	MemAddSelector   <= (MRMEMIN OR MWMEMIN);
-
-	IF_ID_BUFFER_RST <= MemAddSelector OR isBranchTaken;
+	IF_ID_BUFFER_RST <= isBranchTaken;
 
 	MR               <= NOT(MWMEMIN);
-	RamAddress       <= PCOUT(19 DOWNTO 0)    WHEN MemAddSelector = '0' ELSE
-						AluMEMIN(19 DOWNTO 0) WHEN MemAddSelector = '1';
+	RamAddress       <= AluMEMIN(19 DOWNTO 0);
 
+	-- Write Back (WB) Stage
 	DataWBOut <= DataWBIN WHEN MRWBIN = '1' ELSE
 				 AluWBIN  WHEN MRWBIN = '0';
 
-	R : Ram PORT MAP(
+	DataRam : Ram PORT MAP(
 		Clk, Rst,    --  Clk        
 		MWMEMIN, MR, --  MW, MR    
 		RamAddress,  --  Address   
-		RsrcMEMIN,   --  RamDataIn 
+		RdstMEMIN,   --  RamDataIn 
 		-----------OUTPUT-----------
 		MEMDataOut); --  RamDataOut
 
-	PC   : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(PCEnable, Clk, Rst, PCIN, PCOUT, MEMDataOut);
+	InstructionRam : Ram PORT MAP(
+		Clk, Rst,           --  Clk        
+		'0', '1',           --  MW, MR    
+		PCOUT(19 DOWNTO 0), --  Address   
+		(OTHERS => '0'),      --  RamDataIn 
+		-----------OUTPUT-----------
+		IR_Input);          --  RamDataOut
+
+	PC   : NEG_N_REGISTER GENERIC MAP(32) PORT MAP('1', Clk, Rst, PCIN, PCOUT, IR_Input);
 
 	IFID : IF_ID_buffer PORT MAP(
 		Clk,              -- clock 
 		IF_ID_BUFFER_RST, -- reset   
-		MEMDataOut,       -- IRInput 
+		IR_Input,         -- IRInput 
 		-----------OUTPUT-----------
 		IR);              -- IROutput
 

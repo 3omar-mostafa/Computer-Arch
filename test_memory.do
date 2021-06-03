@@ -5,11 +5,10 @@ sim:/pipeline/Rst
 add wave  \
 sim:/pipeline/PCOUT \
 sim:/pipeline/PCIN \
-sim:/pipeline/PCEnable \
 sim:/pipeline/AluEXOUT \
 sim:/pipeline/AluMEMIN \
 sim:/pipeline/AluWBIN
-mem load -i {./Test_Cases/Memory.mem} -format mti /pipeline/R/RamArray
+mem load -i {./Test_Cases/Memory.mem} -format mti /pipeline/InstructionRam/RamArray
 radix -hexadecimal
 add wave -position insertpoint  \
 sim:/pipeline/IR
@@ -48,9 +47,6 @@ force -freeze sim:/pipeline/IN_PORT FFFF 0
 run
 force -freeze sim:/pipeline/IN_PORT F320 0
 run 
-run
-run
-run
 run
 run
 run
