@@ -52,7 +52,6 @@ run
 run
 run
 run
-run
 force -freeze sim:/pipeline/IN_PORT 10 0
 run
 run

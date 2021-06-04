@@ -1,6 +1,7 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.numeric_std.ALL;
+USE IEEE.std_logic_unsigned.ALL;
 
 ENTITY Pipeline IS
 	PORT (
@@ -193,8 +194,8 @@ BEGIN
 		-----------OUTPUT-----------
 		IR_Input);          --  RamDataOut
 
-	PC   : NEG_N_REGISTER GENERIC MAP(32) PORT MAP('1', Clk, Rst, PCIN, PCOUT, IR_Input);
-	unbufferedHasNextOperand <= IR_Input(15) OR IR_Input(31);
+	PC   : POS_N_REGISTER GENERIC MAP(32) PORT MAP('1', Clk, Rst, PCIN, PCOUT, IR_Input);
+	unbufferedHasNextOperand <= IR_Input(31);
 
 	IFID : IF_ID_buffer PORT MAP(
 		Clk,              -- clock 
