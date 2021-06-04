@@ -40,11 +40,8 @@ with open("code.txt") as f:
         #save the instructions   
         instructions.append(line)
 
-#print(instructions)
-print("instructions:",instructions)
 
 IRCodes = [] 
-Labels = {}
 addressCounter = 0
 interruptAddress = 0
 startAddress = 0
@@ -67,14 +64,14 @@ for i,instruction in enumerate(instructions):
             IRCodes.append(hex(addressCounter)[2:] + ": " + '{0:016b}'.format(startAddress) + "\n")
             isAddress = True
             continue
-        elif (addressCounter == startAddress):
-            continue
-        else:
+        elif (addressCounter == 2):
             interruptAddress = int(instructions[i])
             IRCodes.append(hex(addressCounter)[2:] + ": " + '{0:016b}'.format(interruptAddress) + "\n")
             isAddress = True
             continue
-
+        else:
+            continue
+            
     #skipping numbers after .org line
     if(isAddress == True):
         isAddress = False
@@ -82,7 +79,7 @@ for i,instruction in enumerate(instructions):
 
     #handling instructions
     inst = instructions[i].split(' ')[0]
-    #Instruction OPcode #first -> inclusive   second-> exclusive
+    #Instruction OPcode
     code = dictionary[inst]
     if(code[4:6] == "10"):
         twoOperands = True
@@ -93,17 +90,31 @@ for i,instruction in enumerate(instructions):
     elif(code[4:6] == "11"):
         Branch= True
         IR = code + IR[9:]
-
+    
     #cut the string after instruction
     Operands = instruction[len(inst)+1:]
     Operands = Operands.strip()
 
+    #######################one operand & no operand########################
+    if(oneOperand == True):
+        if(inst == "NOP" or inst == "SETC" or inst == "CLRC"):
+            IR = IR[0:9] + "0000000"
+            IRCodes.append(hex(addressCounter)[2:] + ": " + IR + "\n")
+            addressCounter = addressCounter + 1
+            continue
+        else:
+            IR = IR[0:9] + dictionary[Operands] + "0000" 
+            IRCodes.append(hex(addressCounter)[2:] + ": " + IR + "\n")
+            addressCounter = addressCounter + 1
+            continue
+        
+    #######################two operand#############################   
     if(twoOperands == True):
         src = Operands.split(',')[0]
         dst = Operands.split(',')[1]
         #check if SHL & SHR & IADD & LDD & LDM & STD
         if(inst == "SHL" or inst == "SHR" or inst == "IADD" or inst == "LDM"):
-            IR = IR[0:9] + dictionary[src] + "0000"
+            IR = IR[0:9] + "000" + dictionary[src] + "0"
             IRCodes.append(hex(addressCounter)[2:] + ": " + IR + "\n")
             addressCounter = addressCounter + 1
             IRCodes.append(hex(addressCounter)[2:] + ": " + bin(int(dst, 16))[2:].zfill(16) + "\n")
@@ -123,13 +134,19 @@ for i,instruction in enumerate(instructions):
             IRCodes.append(hex(addressCounter)[2:] + ": " + IR +"\n")
             addressCounter = addressCounter + 1
             continue
-    
-    
- 
+
+        
+    #######################Branch#############################  
+    if(Branch == True):
+        if(inst == "RTI" or inst == "RET"):
+            IR = IR[0:9] + "0000000"
+        else:
+            IR = IR[0:9] + dictionary[Operands] + "0000"
+        IRCodes.append(hex(addressCounter)[2:] + ": " + IR +"\n")
+        addressCounter = addressCounter + 1
+
+
 #writing IR codes in output file
 outputFile = open("IRCodesFile.txt","w")
 outputFile.writelines(IRCodes)
 outputFile.close()
-print("IRcodes: ",IRCodes)
-
-    
