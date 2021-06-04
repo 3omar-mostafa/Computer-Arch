@@ -165,11 +165,12 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 
 	SIGNAL isBranchTaken, unbufferedHasNextOperand                                     : STD_LOGIC;
 
-	SIGNAL IF_ID_BUFFER_RST                                                            : STD_LOGIC;
+	SIGNAL IF_ID_BUFFER_RST, ID_EX_BUFFER_RST                                          : STD_LOGIC;
 
 BEGIN
 
 	IF_ID_BUFFER_RST <= isBranchTaken;
+	ID_EX_BUFFER_RST <= isBranchTaken;
 
 	MR               <= NOT(MWMEMIN);
 	RamAddress       <= AluMEMIN(19 DOWNTO 0);
@@ -220,7 +221,7 @@ BEGIN
 		DEC_IN_ImmediateVal);                                    -- ImmediateVal
 
 	IDEX : ID_EX_buffer PORT MAP(
-		Clk, Rst,                                                                    -- clk, reset
+		Clk, ID_EX_BUFFER_RST,                                                       -- clk, reset
 		DEC_IN_MEM_READ, DEC_IN_MEM_WRITE, DEC_IN_WRITE_BACK, DEC_IN_IS_LOAD_STORE,  -- MR, MW, WB,isLoadStore
 		DEC_IN_POP, DEC_IN_PUSH, DEC_IN_BRANCH, DEC_IN_JMP, DEC_IN_HAS_NEXT_OPERAND, -- pop, push, branch, jump, hasNextOp           
 		DEC_IN_RsrcAddress, DEC_IN_RdestAddress,                                     -- RsrcAddress, RdestAddress               

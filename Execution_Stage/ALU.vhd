@@ -124,8 +124,8 @@ BEGIN
 	zero_flag_enable <= '1' WHEN opcode = "00011" OR opcode = "00100" OR opcode = "00101" OR opcode = "00110" OR opcode = "00111" OR opcode = "10000" OR opcode = "10001" OR opcode = "10010" OR opcode = "10011"
 	ELSE '0';
 
-	carry_flag <= '0' WHEN rst = '1' ELSE
-		 temp_result(32) WHEN (carry_flag_enable = '1');
+	carry_flag <= temp_result(32) WHEN (carry_flag_enable = '1') ELSE
+		'0';
 
 	negative_flag <= '0' WHEN rst = '1' ELSE
 		    temp_result(31) WHEN (negative_flag_enable = '1');
