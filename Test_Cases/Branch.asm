@@ -17,7 +17,6 @@ in R4     #R4=300
 Push R4   #sp=FFFFFFFC, M[FFFFFFFE]=300
 JMP R1 
 INC R1	  # this statement shouldn't be executed,
- 
 #check flag fowarding  
 .ORG 30
 AND R1,R5   #R5=0 , Z = 1

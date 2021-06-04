@@ -11,7 +11,7 @@
 .ORG 10
 in R1        #add 5 in R1
 in R2        #add 19 in R2
-in R3        #FFFFFFF
+in R3        #FFFFFFFF
 in R4        #FFFFF320
 MoV R3,R5    #R5 = FFFFFFFF , flags no change
 ADD R1,R4    #R4= FFFFF325 , C-->0, N-->1, Z-->0

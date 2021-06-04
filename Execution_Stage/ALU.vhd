@@ -12,7 +12,7 @@ ENTITY ALU IS
 		InPort        : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		Rout          : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		OutPort       : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		carry_flag    : OUT STD_LOGIC;
+		carry_flag    : INOUT STD_LOGIC;
 		negative_flag : OUT STD_LOGIC;
 		zero_flag     : OUT STD_LOGIC
 	);
@@ -21,6 +21,17 @@ END ALU;
 ARCHITECTURE arch_ALU OF ALU IS
 
 	COMPONENT NEG_N_REGISTER IS
+		GENERIC (N : INTEGER := 32);
+		PORT (
+			Enable    : IN STD_LOGIC;
+			clk, rst  : IN STD_LOGIC;
+			D         : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
+			Q         : OUT STD_LOGIC_VECTOR(N - 1 DOWNTO 0);
+			rst_value : IN STD_LOGIC_VECTOR(N - 1 DOWNTO 0) := (OTHERS => '0') -- Reset to rst_value if provided, else reset to zeros [This is an optional parameter]
+		);
+	END COMPONENT;
+
+	COMPONENT POS_N_REGISTER IS
 		GENERIC (N : INTEGER := 32);
 		PORT (
 			Enable    : IN STD_LOGIC;
@@ -45,6 +56,7 @@ ARCHITECTURE arch_ALU OF ALU IS
 	SIGNAL negative_flag_enable : STD_LOGIC;
 	SIGNAL zero_flag_enable     : STD_LOGIC;
 
+	SIGNAL carry_flag_out       : STD_LOGIC;
 	SIGNAL temp_result          : STD_LOGIC_VECTOR(32 DOWNTO 0); -- 32 not 31 to be able to get the carry
 
 	SIGNAL SP_out               : STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -54,9 +66,15 @@ ARCHITECTURE arch_ALU OF ALU IS
 	SIGNAL SP_reset             : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"000FFFFE";  -- Stack Pointer initialized by pointing to the highest memory address (2^20 -2) for 1MB memory
 	SIGNAL SP_Enable            : STD_LOGIC;
 
-	SIGNAL OutPort_Enable : STD_LOGIC;
+	SIGNAL OutPort_Enable       : STD_LOGIC;
+
+	SIGNAL isRdstBiggerThanRsrc : STD_LOGIC;
 
 BEGIN
+
+	isRdstBiggerThanRsrc <= '1' when (Rdst >= Rsrc) else '0';
+
+	carry_reg : POS_D_FLIP_FLOP PORT MAP(carry_flag_enable, clk, rst, carry_flag, carry_flag_out);
 
 	SP_add <= SP_out + 2;
 	SP_sub <= SP_out - 2;
@@ -64,7 +82,7 @@ BEGIN
 	SP_in  <= SP_add WHEN push = '0' ELSE SP_sub;
 
 	SP_Enable <= push OR pop;
-	SP : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(SP_Enable, clk, rst, SP_in, SP_out, SP_reset);
+	SP : POS_N_REGISTER GENERIC MAP(32) PORT MAP(SP_Enable, clk, rst, SP_in, SP_out, SP_reset);
 
 	OutPort_Enable <= '1' WHEN opcode = "01000" ELSE '0';
 	OutPortReg : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(OutPort_Enable, clk, rst, Rdst, OutPort); -- Out instruction
@@ -80,14 +98,15 @@ BEGIN
         ('0' & Rdst - 1)                       WHEN opcode = "00110" ELSE   -- decrement
         STD_LOGIC_VECTOR(-signed('0' & Rdst))  WHEN opcode = "00111" ELSE   -- 2's complement
         ('0' & InPort) 		                   WHEN opcode = "01001" ELSE   -- In instruction
-        STD_LOGIC_VECTOR(Rdst(31) & rotate_left(unsigned(Rdst), 1)) WHEN opcode = "01010" ELSE
-        STD_LOGIC_VECTOR(Rdst(0) & rotate_right(unsigned(Rdst), 1)) WHEN opcode = "01011" ELSE
+        STD_LOGIC_VECTOR( rotate_left(unsigned(carry_flag_out & Rdst), 1)) WHEN opcode = "01010" ELSE
+        STD_LOGIC_VECTOR(rotate_right(unsigned(carry_flag_out & Rdst), 1)) WHEN opcode = "01011" ELSE
         ('0' & SP_out) WHEN (push = '1' AND opcode = "01100") ELSE
         ('0' & SP_add) WHEN (pop = '1'  AND opcode = "01101") ELSE
 
         --  2 operands
         ('0' & Rdst + Rsrc)     WHEN opcode = "10000" ELSE
-        ('0' & Rdst - Rsrc)     WHEN opcode = "10001" ELSE
+		('0' & Rdst - Rsrc)     WHEN (opcode = "10001" AND isRdstBiggerThanRsrc = '1') ELSE
+		('1' & Rsrc - Rdst)     WHEN (opcode = "10001" AND isRdstBiggerThanRsrc = '0') ELSE
         ('0' & (Rdst AND Rsrc)) WHEN opcode = "10010" ELSE
         ('0' & (Rdst OR Rsrc))  WHEN opcode = "10011" ELSE
         ('0' & Rsrc)            WHEN opcode = "10100" ELSE -- MOV operation

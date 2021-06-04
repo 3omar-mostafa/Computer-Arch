@@ -37,7 +37,7 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 			DataWidth    : INTEGER := 32
 		);
 		PORT (
-			Clk        : IN STD_LOGIC;
+			Clk, Rst   : IN STD_LOGIC;
 			MW, MR     : IN STD_LOGIC;
 			Address    : IN STD_LOGIC_VECTOR(RamAddrWidth - 1 DOWNTO 0);
 			RamDataIn  : IN STD_LOGIC_VECTOR(DataWidth - 1 DOWNTO 0);
@@ -76,10 +76,10 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 		PORT (
 			clock, reset, MR, MW, WB : IN STD_LOGIC;
 			RdestAddress             : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-			Rsrc, AluIn              : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			Rdst, AluIn              : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 			MROut, MWOut, WBOut      : OUT STD_LOGIC;
 			RdestAddressOut          : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-			RsrcOut, AluOut          : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+			RdstOut, AluOut          : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
 		);
 	END COMPONENT;
 
@@ -113,29 +113,30 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 
 	COMPONENT Execution_Stage IS
 		PORT (
-			clk, rst                           : IN STD_LOGIC;
-			isLoadStore, hasNextOperand        : IN STD_LOGIC;
-			push, pop, branch, jump            : IN STD_LOGIC;
-			ID_EX_Rsrc, ID_EX_Rdst             : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-			EX_Mem_Rdst, Mem_WB_Rdst           : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-			EX_Mem_WriteBack, Mem_WB_WriteBack : IN STD_LOGIC;
-			RsrcData, RdstData                 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-			Mem_Stage_Out, WB_Stage_Out        : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-			ImmediateValue                     : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
-			OpCode                             : IN STD_LOGIC_VECTOR (4 DOWNTO 0);
-			PCin                               : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			InPort                             : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			clk, rst                                 : IN STD_LOGIC;
+			isLoadStore                              : IN STD_LOGIC;
+			hasNextOperand, unbufferedHasNextOperand : IN STD_LOGIC;
+			push, pop, branch, jump                  : IN STD_LOGIC;
+			ID_EX_Rsrc, ID_EX_Rdst                   : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+			EX_Mem_Rdst, Mem_WB_Rdst                 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+			EX_Mem_WriteBack, Mem_WB_WriteBack       : IN STD_LOGIC;
+			RsrcData, RdstData                       : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			Mem_Stage_Out, WB_Stage_Out              : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			ImmediateValue                           : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+			OpCode                                   : IN STD_LOGIC_VECTOR (4 DOWNTO 0);
+			PCin                                     : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			InPort                                   : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-			PCout                              : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			OutPort                            : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			RsrcOut, AluOut                    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-			isBranchTaken                      : OUT STD_LOGIC
+			PCout                                    : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			OutPort                                  : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			RdstOut, AluOut                          : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+			isBranchTaken                            : OUT STD_LOGIC
 		);
 	END COMPONENT;
 
 	--PCIN should be from the Branch Control Unit
 	SIGNAL PCIN                                                                        : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL PCOUT, RsrcEXOUT, AluEXOUT, RsrcMEMIN                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL PCOUT, RdstEXOUT, AluEXOUT, RdstMEMIN                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL AluMEMIN, MEMDataOut, DataWBIN, AluWBIN, DataWBOut, IR                      : STD_LOGIC_VECTOR(31 DOWNTO 0);
 	--MREXOUT -> memory read the output from execution stage
 	--MRMEMIN -> memory read the input to memory stage
@@ -159,41 +160,46 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 	SIGNAL EX_IN_RsrcData, EX_IN_RdestData                                             : STD_LOGIC_VECTOR (31 DOWNTO 0);
 	SIGNAL EX_IN_RsrcAddress, EX_IN_RdestAddress                                       : STD_LOGIC_VECTOR (2 DOWNTO 0);
 
-	SIGNAL IN_PORT                                                                     : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL OUT_PORT                                                                    : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL IN_PORT, OUT_PORT, IR_Input                                                 : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 
-	SIGNAL isBranchTaken                                                               : STD_LOGIC;
+	SIGNAL isBranchTaken, unbufferedHasNextOperand                                     : STD_LOGIC;
 
 	SIGNAL IF_ID_BUFFER_RST                                                            : STD_LOGIC;
 
 BEGIN
 
-	PCEnable         <= NOT(MRMEMIN OR MWMEMIN);
-	MemAddSelector   <= (MRMEMIN OR MWMEMIN);
-
-	IF_ID_BUFFER_RST <= MemAddSelector OR isBranchTaken;
+	IF_ID_BUFFER_RST <= isBranchTaken;
 
 	MR               <= NOT(MWMEMIN);
-	RamAddress       <= PCOUT(19 DOWNTO 0)    WHEN MemAddSelector = '0' ELSE
-						AluMEMIN(19 DOWNTO 0) WHEN MemAddSelector = '1';
+	RamAddress       <= AluMEMIN(19 DOWNTO 0);
 
+	-- Write Back (WB) Stage
 	DataWBOut <= DataWBIN WHEN MRWBIN = '1' ELSE
-				AluWBIN  WHEN MRWBIN = '0';
+				 AluWBIN  WHEN MRWBIN = '0';
 
-	R : Ram PORT MAP(
-		Clk,         --  Clk        
+	DataRam : Ram PORT MAP(
+		Clk, Rst,    --  Clk        
 		MWMEMIN, MR, --  MW, MR    
 		RamAddress,  --  Address   
-		RsrcMEMIN,   --  RamDataIn 
+		RdstMEMIN,   --  RamDataIn 
 		-----------OUTPUT-----------
 		MEMDataOut); --  RamDataOut
 
-	PC   : NEG_N_REGISTER GENERIC MAP(32) PORT MAP(PCEnable, Clk, Rst, PCIN, PCOUT);
+	InstructionRam : Ram PORT MAP(
+		Clk, Rst,           --  Clk        
+		'0', '1',           --  MW, MR    
+		PCOUT(19 DOWNTO 0), --  Address   
+		(OTHERS => '0'),      --  RamDataIn 
+		-----------OUTPUT-----------
+		IR_Input);          --  RamDataOut
+
+	PC   : NEG_N_REGISTER GENERIC MAP(32) PORT MAP('1', Clk, Rst, PCIN, PCOUT, IR_Input);
+	unbufferedHasNextOperand <= IR_Input(15) OR IR_Input(31);
 
 	IFID : IF_ID_buffer PORT MAP(
 		Clk,              -- clock 
 		IF_ID_BUFFER_RST, -- reset   
-		MEMDataOut,       -- IRInput 
+		IR_Input,         -- IRInput 
 		-----------OUTPUT-----------
 		IR);              -- IROutput
 
@@ -230,7 +236,8 @@ BEGIN
 
 	EXECUTING_STG : Execution_Stage PORT MAP(
 		Clk, Rst,                                        -- clk, rst                           
-		EX_IN_isLoadStore, EX_IN_hasNextOp,              -- isLoadStore, hasNextOperand        
+		EX_IN_isLoadStore,                               -- isLoadStore
+		EX_IN_hasNextOp, unbufferedHasNextOperand,       -- hasNextOperand, unbufferedHasNextOperand        
 		EX_IN_push, EX_IN_pop, EX_IN_branch, EX_IN_jump, -- push, pop, branch, jump            
 		EX_IN_RsrcAddress, EX_IN_RdestAddress,           -- ID_EX_Rsrc, ID_EX_Rdst             
 		RdestAddMEMIN, RdestAddWBIN,                     -- EX_Mem_Rdst, Mem_WB_Rdst           
@@ -244,7 +251,7 @@ BEGIN
 		------------------------OUTPUT------------------------
 		PCIN,                                            -- PCout                              
 		OUT_PORT,                                        -- OutPort                            
-		RsrcEXOUT, AluEXOUT,                             -- RsrcOut, AluOut                    
+		RdstEXOUT, AluEXOUT,                             -- RdstOut, AluOut                    
 		isBranchTaken                                    -- isBranchTaken                      
 	);
 
@@ -252,11 +259,11 @@ BEGIN
 		Clk, Rst,                     -- clock, reset  
 		EX_IN_MR, EX_IN_MW, EX_IN_WB, -- MR, MW, WB 
 		EX_IN_RdestAddress,           -- RdestAddress             
-		RsrcEXOUT, AluEXOUT,          -- Rsrc, AluIn              
+		RdstEXOUT, AluEXOUT,          -- Rdst, AluIn              
 		------------------------OUTPUT------------------------
 		MRMEMIN, MWMEMIN, WBMEMIN,    -- MROut, MWOut, WBOut      
 		RdestAddMEMIN,                -- RdestAddressOut          
-		RsrcMEMIN, AluMEMIN);         -- RsrcOut, AluOut          
+		RdstMEMIN, AluMEMIN);         -- RdstOut, AluOut          
 
 	MEMWB : MEM_WB_buffer PORT MAP(
 		Clk, Rst,             -- clock, reset                  
