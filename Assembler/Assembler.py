@@ -57,16 +57,16 @@ for i,instruction in enumerate(instructions):
     #handling org
     pattern = '^.ORG*'
     if(re.search(pattern,instruction)):
-        addressCounter = int(instruction.split(' ')[1])
+        addressCounter = int(instruction.split(' ')[1],16)
         i = i+1
         if(addressCounter == 0):
-            startAddress = int(instructions[i])
-            IRCodes.append(hex(addressCounter)[2:] + ": " + '{0:016b}'.format(startAddress) + "\n")
+            startAddress = int(instructions[i],16)
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + '{0:016b}'.format(startAddress) + "\n")
             isAddress = True
             continue
         elif (addressCounter == 2):
-            interruptAddress = int(instructions[i])
-            IRCodes.append(hex(addressCounter)[2:] + ": " + '{0:016b}'.format(interruptAddress) + "\n")
+            interruptAddress = int(instructions[i],16)
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + '{0:016b}'.format(interruptAddress) + "\n")
             isAddress = True
             continue
         else:
@@ -99,12 +99,12 @@ for i,instruction in enumerate(instructions):
     if(oneOperand == True):
         if(inst == "NOP" or inst == "SETC" or inst == "CLRC"):
             IR = IR[0:9] + "0000000"
-            IRCodes.append(hex(addressCounter)[2:] + ": " + IR + "\n")
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + IR + "\n")
             addressCounter = addressCounter + 1
             continue
         else:
-            IR = IR[0:9] + dictionary[Operands] + "0000" 
-            IRCodes.append(hex(addressCounter)[2:] + ": " + IR + "\n")
+            IR = IR[0:9] + "000" + dictionary[Operands] + "0" 
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + IR + "\n")
             addressCounter = addressCounter + 1
             continue
         
@@ -115,23 +115,23 @@ for i,instruction in enumerate(instructions):
         #check if SHL & SHR & IADD & LDD & LDM & STD
         if(inst == "SHL" or inst == "SHR" or inst == "IADD" or inst == "LDM"):
             IR = IR[0:9] + "000" + dictionary[src] + "0"
-            IRCodes.append(hex(addressCounter)[2:] + ": " + IR + "\n")
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + IR + "\n")
             addressCounter = addressCounter + 1
-            IRCodes.append(hex(addressCounter)[2:] + ": " + bin(int(dst, 16))[2:].zfill(16) + "\n")
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + bin(int(dst, 16))[2:].zfill(16) + "\n")
             addressCounter = addressCounter + 1
             continue
         elif(inst == "LDD" or inst == "STD"): #LDD R3,202(R5)
             Imm = dst.split('(')[0] #202
             dst = dst.split('(')[1]
-            IR = IR[0:9] + dictionary[src] + dictionary[dst[0:2]] + '0'
-            IRCodes.append(hex(addressCounter)[2:] + ": " + IR + "\n")
+            IR = IR[0:9] + dictionary[dst[0:2]] + dictionary[src] + '0'
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + IR + "\n")
             addressCounter = addressCounter + 1
-            IRCodes.append(hex(addressCounter)[2:] + ": " + bin(int(Imm, 16))[2:].zfill(16) + "\n")
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + bin(int(Imm, 16))[2:].zfill(16) + "\n")
             addressCounter = addressCounter + 1
             continue
         else:
             IR = IR[0:9] + dictionary[src] + dictionary[dst]+ '0'
-            IRCodes.append(hex(addressCounter)[2:] + ": " + IR +"\n")
+            IRCodes.append(hex(addressCounter).upper()[2:] + ": " + IR +"\n")
             addressCounter = addressCounter + 1
             continue
 
@@ -141,8 +141,8 @@ for i,instruction in enumerate(instructions):
         if(inst == "RTI" or inst == "RET"):
             IR = IR[0:9] + "0000000"
         else:
-            IR = IR[0:9] + dictionary[Operands] + "0000"
-        IRCodes.append(hex(addressCounter)[2:] + ": " + IR +"\n")
+            IR = IR[0:9] + "000" + dictionary[Operands] +"0" 
+        IRCodes.append(hex(addressCounter).upper()[2:] + ": " + IR +"\n")
         addressCounter = addressCounter + 1
 
 
