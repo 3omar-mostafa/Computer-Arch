@@ -134,6 +134,14 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 			isBranchTaken                            : OUT STD_LOGIC
 		);
 	END COMPONENT;
+	
+	COMPONENT hazard_control IS
+		PORT (
+		Clk, Rst : IN STD_LOGIC;
+        CurrentIR , NextIR   : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+        IsLoadUse : OUT std_logic
+    	);
+	END COMPONENT;
 
 	--PCIN should be from the Branch Control Unit
 	SIGNAL PCIN                                                                        : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
@@ -167,9 +175,10 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 
 	SIGNAL IF_ID_BUFFER_RST                                                            : STD_LOGIC;
 
+	SIGNAL IsLoadUse, IsNotLoadUse, LoadUseReset                                       : STD_LOGIC := '0';
 BEGIN
 
-	IF_ID_BUFFER_RST <= isBranchTaken;
+	IF_ID_BUFFER_RST <= (isBranchTaken OR LoadUseReset);
 
 	MR               <= NOT(MWMEMIN);
 	RamAddress       <= AluMEMIN(19 DOWNTO 0);
@@ -177,6 +186,16 @@ BEGIN
 	-- Write Back (WB) Stage
 	DataWBOut <= DataWBIN WHEN MRWBIN = '1' ELSE
 				 AluWBIN  WHEN MRWBIN = '0';
+
+	LoadUse : hazard_control PORT MAP(
+		Clk, LoadUseReset,      --Rst
+		IR,                --CurrentIR
+		IR_Input,		   --NextIR
+		-----------OUTPUT-----------
+        IsLoadUse);        --IsLoadUse
+
+	IsNotLoadUse <= NOT IsLoadUse;
+	LoadUseReset <= IsLoadUse WHEN (rising_edge(Clk) OR falling_edge(Clk));
 
 	DataRam : Ram PORT MAP(
 		Clk, Rst,    --  Clk        
@@ -194,7 +213,7 @@ BEGIN
 		-----------OUTPUT-----------
 		IR_Input);          --  RamDataOut
 
-	PC   : POS_N_REGISTER GENERIC MAP(32) PORT MAP('1', Clk, Rst, PCIN, PCOUT, IR_Input);
+	PC   : POS_N_REGISTER GENERIC MAP(32) PORT MAP(IsNotLoadUse, Clk, Rst, PCIN, PCOUT, IR_Input);
 	unbufferedHasNextOperand <= IR_Input(31);
 
 	IFID : IF_ID_buffer PORT MAP(
