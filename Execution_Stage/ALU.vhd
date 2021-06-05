@@ -79,9 +79,11 @@ BEGIN
 	SP_add <= SP_out + 2;
 	SP_sub <= SP_out - 2;
 
-	SP_in  <= SP_add WHEN push = '0' ELSE SP_sub;
+	SP_in  <= SP_add WHEN push = '0' AND NOT (opcode = "11100") ELSE SP_sub;
 
-	SP_Enable <= push OR pop;
+	SP_Enable <= '1' WHEN (push = '1' OR pop = '1' OR opcode = "11100" OR opcode = "11101" OR opcode = "11110") 
+		ELSE '0';
+	
 	SP : POS_N_REGISTER GENERIC MAP(32) PORT MAP(SP_Enable, clk, rst, SP_in, SP_out, SP_reset);
 
 	OutPort_Enable <= '1' WHEN opcode = "01000" ELSE '0';
@@ -102,6 +104,10 @@ BEGIN
         STD_LOGIC_VECTOR(rotate_right(unsigned(carry_flag_out & Rdst), 1)) WHEN opcode = "01011" ELSE
         ('0' & SP_out) WHEN (push = '1' AND opcode = "01100") ELSE
         ('0' & SP_add) WHEN (pop = '1'  AND opcode = "01101") ELSE
+
+		('0' & SP_out) WHEN (opcode = "11100") ELSE	--call
+        ('0' & SP_add) WHEN (opcode = "11101") ELSE	--ret same as pop but Rdst is PC
+        ('0' & SP_add) WHEN (opcode = "11110") ELSE	--rti
 
         --  2 operands
         ('0' & Rdst + Rsrc)     WHEN opcode = "10000" ELSE
