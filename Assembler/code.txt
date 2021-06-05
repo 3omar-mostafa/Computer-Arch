@@ -21,4 +21,15 @@ in R5        #R5= 10
 STD R2,200(R5)   #M[210]=5
 STD R1,202(R5)   #M[212]=19
 LDD R3,202(R5)   #R3=19
+
 LDD R4,200(R5)   #R4=5
+IADD R4, 5       #R4=A
+
+LDD R3,202(R5)   #R3=19
+MOV R5,R3        #R5=19
+
+LDD R3,202(R5)   #R3=19
+LDD R5,202(R3)   #R5=0
+
+LDD R3,202(R5)   #R3=19
+INC R3           #R5=1A

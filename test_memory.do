@@ -13,14 +13,17 @@ radix -hexadecimal
 add wave -position insertpoint  \
 sim:/pipeline/IR
 add wave -position insertpoint  \
+sim:/pipeline/IR_Input
+add wave -position insertpoint  \
 sim:/pipeline/IN_PORT
 add wave -position insertpoint  \
 sim:/pipeline/OUT_PORT
 add wave -position insertpoint  \
 sim:/pipeline/EXECUTING_STG/carry_flag \
 sim:/pipeline/EXECUTING_STG/negative_flag \
-sim:/pipeline/EXECUTING_STG/zero_flag
-add wave -position insertpoint  \
+sim:/pipeline/EXECUTING_STG/zero_flag \
+sim:/pipeline/IsLoadUse \
+sim:/pipeline/IF_ID_BUFFER_RST \
 sim:/pipeline/EXECUTING_STG/alu_unit/SP_out \
 sim:/pipeline/DECODING_STG/REG_F/R0_OUT \
 sim:/pipeline/DECODING_STG/REG_F/R1_OUT \
@@ -64,3 +67,4 @@ run
 run
 run
 run
+run 1100 ps
