@@ -4,15 +4,9 @@ sim:/pipeline/Clk \
 sim:/pipeline/Rst
 add wave  \
 sim:/pipeline/PCOUT \
-sim:/pipeline/PCIN \
-sim:/pipeline/PCEnable \
-sim:/pipeline/AluEXOUT \
-sim:/pipeline/AluMEMIN \
-sim:/pipeline/AluWBIN
+sim:/pipeline/AluEXOUT
 mem load -i {./Test_Cases/BranchTA.mem} -format mti /pipeline/InstructionRam/RamArray
 radix -hexadecimal
-add wave -position insertpoint  \
-sim:/pipeline/IR
 add wave -position insertpoint  \
 sim:/pipeline/IN_PORT
 add wave -position insertpoint  \

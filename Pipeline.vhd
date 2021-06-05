@@ -179,6 +179,7 @@ ARCHITECTURE arch_Pipeline OF Pipeline IS
 BEGIN
 
 	IF_ID_BUFFER_RST <= (isBranchTaken OR LoadUseReset);
+	ID_EX_BUFFER_RST <= isBranchTaken;
 
 	MR               <= NOT(MWMEMIN);
 	RamAddress       <= AluMEMIN(19 DOWNTO 0);

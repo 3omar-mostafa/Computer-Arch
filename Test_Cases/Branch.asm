@@ -42,7 +42,7 @@ rti
 
 #check on load use
 .ORG 200
-SET C      #C-->1
+SETC      #C-->1
 POP R6     #R6=300, SP=FFFFFFFE
 Call R6    #SP=FFFFFFFC, M[FFFFFFFE]=half next PC,M[FFFFFFFF]=other half next PC
 INC R6	  #R6=401, this statement shouldn't be executed till call returns, C--> 0, N-->0,Z-->0
