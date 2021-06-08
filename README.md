@@ -102,8 +102,8 @@
   </tr>
   <tr>
     <td>NOT  Rdst</td>
-    <td>NOT value stored in register  Rdst
-Rdst ← 1’s Complement(Rdst); </td>
+    <td>NOT value stored in register Rdst
+    <br>Rdst ← 1’s Complement(Rdst) </td>
     <td>0001 0 0100 # 4</td>
   </tr>
   <tr>
@@ -118,8 +118,8 @@ Rdst ← 1’s Complement(Rdst); </td>
   </tr>
   <tr>
     <td>NEG  Rdst</td>
-    <td>Negate the value stored in register  Rdst
-Rdst ← 2’s Complement(Rdst); </td>
+    <td>Negate the value stored in register Rdst
+    <br>Rdst ← 2’s Complement(Rdst) </td>
     <td>0001 0 0111 # 7</td>
   </tr>
   <tr>
@@ -144,12 +144,14 @@ Rdst ← 2’s Complement(Rdst); </td>
   </tr>
   <tr>
     <td>PUSH  Rdst</td>
-    <td>X[SP] ← R[ Rdst ]; SP-=2</td>
+    <td>Mem[SP] ← Rdst
+    <br>SP -= 2</td>
     <td>0010 0 1100 # 12</td>
   </tr>
   <tr>
     <td>POP  Rdst</td>
-    <td>SP+=2; R[ Rdst ] ← X[SP]; </td>
+    <td>SP += 2
+     <br>Rdst ← Mem[SP]; </td>
     <td>0101 0 1101 # 13</td>
   </tr>
 </table>
